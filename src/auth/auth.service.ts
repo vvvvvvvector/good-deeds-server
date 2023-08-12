@@ -41,10 +41,13 @@ export class AuthService {
       password: hash,
     });
 
-    return this.generateJWT(id);
+    return {
+      ...this.generateJWT(id),
+      message: 'success',
+    };
   }
 
-  private async generateJWT(id: number) {
+  private generateJWT(id: number) {
     const payload = { id };
 
     return { token: this.jwtService.sign(payload) };

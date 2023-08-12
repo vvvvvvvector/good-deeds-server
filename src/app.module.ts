@@ -8,12 +8,15 @@ import { UsersModule } from './users/users.module';
 import { UserEntity } from './users/user.entity';
 import { ThingsModule } from './things/things.module';
 import { ThingEntity } from './things/thing.entity';
+import { FriendshipsModule } from './friendships/friendships.module';
+import { FriendshipEntity } from './friendships/friendship.entity';
 
 @Module({
   imports: [
     AuthModule,
     UsersModule,
     ThingsModule,
+    FriendshipsModule,
     ConfigModule.forRoot(),
     TypeOrmModule.forRoot({
       type: 'postgres',
@@ -22,7 +25,7 @@ import { ThingEntity } from './things/thing.entity';
       username: process.env.DB_POSTGRES_USER,
       password: process.env.DB_POSTGRES_PASSWORD,
       database: process.env.DB_POSTGRES_NAME,
-      entities: [UserEntity, ThingEntity],
+      entities: [UserEntity, ThingEntity, FriendshipEntity],
       synchronize: true,
     }),
   ],

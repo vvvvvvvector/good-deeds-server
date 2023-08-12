@@ -11,7 +11,7 @@ import {
   ParseIntPipe,
 } from '@nestjs/common';
 import { ThingsService } from './things.service';
-import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { CreateThingDto } from './dto/create-thing.dto';
 
@@ -21,6 +21,11 @@ import { CreateThingDto } from './dto/create-thing.dto';
 @ApiTags('things')
 export class ThingsController {
   constructor(private readonly thingsService: ThingsService) {}
+
+  @Get(':id')
+  getThingById(@Param('id', ParseIntPipe) id: number) {
+    return this.thingsService.getThingById(id);
+  }
 
   @Get()
   getAllThings(@Req() req) {
@@ -34,7 +39,7 @@ export class ThingsController {
 
   @Delete(':id')
   deleteThing(@Req() req, @Param('id', ParseIntPipe) id: number) {
-    return req.userId + ' ' + id;
+    return this.thingsService.deleteThing(req.userId, id);
   }
 
   @Patch(':id')
@@ -43,6 +48,6 @@ export class ThingsController {
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: CreateThingDto,
   ) {
-    return req.userId + ' ' + id;
+    return this.thingsService.updateThing(req.userId, id, dto);
   }
 }

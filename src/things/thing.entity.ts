@@ -10,6 +10,6 @@ export class ThingEntity {
   @Column()
   text: string;
 
-  @ManyToOne(() => UserEntity, (user) => user.things)
+  @ManyToOne(() => UserEntity, (user) => user.things, { onDelete: 'CASCADE' })
   user: UserEntity;
 }

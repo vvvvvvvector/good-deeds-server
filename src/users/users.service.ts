@@ -1,4 +1,8 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from './user.entity';
 import { Repository } from 'typeorm';
@@ -11,6 +15,37 @@ export class UsersService {
     @InjectRepository(UserEntity)
     private repository: Repository<UserEntity>,
   ) {}
+
+  async getUserById(id: number) {
+    const user = await this.repository.findOne({
+      where: {
+        id,
+      },
+      select: {
+        username: true,
+        email: true,
+      },
+    });
+
+    return user;
+  }
+
+  async getUserIdByUsername(username: string) {
+    try {
+      const { id } = await this.repository.findOne({
+        where: {
+          username,
+        },
+        select: {
+          id: true,
+        },
+      });
+
+      return id;
+    } catch (error) {
+      throw new NotFoundException("User with that username can't be found");
+    }
+  }
 
   async getUserByEmail(email: string) {
     const user = await this.repository.findOneBy({
@@ -39,20 +74,26 @@ export class UsersService {
   }
 
   async updateUser(id: number, updated: CreateUserDto) {
-    const salt = await bcrypt.genSalt();
-    const hash = await bcrypt.hash(updated.password, salt);
+    try {
+      await this.repository.update(id, { username: updated.username });
+      await this.repository.update(id, { email: updated.email });
 
-    const user = await this.repository.update(id, {
-      ...updated,
-      password: hash,
-    });
+      if (updated.password !== '') {
+        const salt = await bcrypt.genSalt();
+        const hash = await bcrypt.hash(updated.password, salt);
 
-    if (user.affected === 1) {
+        await this.repository.update(id, {
+          password: hash,
+        });
+      }
+
       return {
         message: 'success',
       };
-    }
+    } catch (error) {
+      console.log(error);
 
-    throw new ForbiddenException('Error occurred while updating user.');
+      throw new ForbiddenException('Error occurred while updating user.');
+    }
   }
 }
